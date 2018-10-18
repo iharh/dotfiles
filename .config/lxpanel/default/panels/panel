@@ -1,0 +1,110 @@
+# lxpanel <profile> config file. Manually editing is not recommended.
+# Use preference dialog in lxpanel to adjust config when you can.
+
+Global {
+  edge=top
+  allign=left
+  margin=0
+  widthtype=percent
+  width=100
+  height=26
+  transparent=1
+  tintcolor=#2e3436
+  alpha=255
+  setdocktype=1
+  setpartialstrut=1
+  usefontcolor=1
+  fontcolor=#ffffff
+  usefontsize=0
+  fontsize=10
+  background=0
+  backgroundfile=/usr/share/lxpanel/images/background.png
+  iconsize=24
+}
+Plugin {
+  type=space
+  Config {
+    Size=2
+  }
+  expand=0
+}
+Plugin {
+  type=menu
+  Config {
+    image=/usr/share/lxpanel/images/my-computer.png
+    system {
+    }
+    separator {
+    }
+    item {
+      command=run
+    }
+    separator {
+    }
+    item {
+      image=gnome-logout
+      command=logout
+    }
+  }
+}
+Plugin {
+  type=launchtaskbar
+  Config {
+    ShowAllDesks=0
+    tooltips=-1
+    IconsOnly=0
+    FlatButton=0
+    UseMouseWheel=-1
+    Button {
+      id=pcmanfm.desktop
+    }
+    Button {
+      id=firefox.desktop
+    }
+    Button {
+      id=google-chrome.desktop
+    }
+    Button {
+      id=slack.desktop
+    }
+    Button {
+      id=telegramdesktop.desktop
+    }
+    Button {
+      id=skypeforlinux.desktop
+    }
+    Button {
+      id=visual-studio-code.desktop
+    }
+  }
+}
+Plugin {
+  type=space
+  Config {
+    Size=38
+  }
+}
+Plugin {
+  type=dclock
+  Config {
+    ClockFmt=%R
+    TooltipFmt=%A %x
+    BoldFont=0
+    IconOnly=0
+    CenterText=0
+  }
+}
+Plugin {
+  type=xkb
+  Config {
+    Model=pc105
+    LayoutsList=us
+    VariantsList=,
+    ToggleOpt=grp:shift_caps_toggle
+  }
+}
+Plugin {
+  type=deskno
+  Config {
+  }
+}

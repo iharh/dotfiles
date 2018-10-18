@@ -1,0 +1,5 @@
+# -*- mode: conf -*-
+#$include /etc/inputrc
+
+#"\M-[3~": delete-char
+"\e[3~": delete-char

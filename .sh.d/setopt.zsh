@@ -1,0 +1,7 @@
+setopt autocd
+#setopt HIST_IGNORE_DUPS
+setopt hist_ignore_dups
+setopt hist_ignore_all_dups
+setopt hist_save_no_dups
+setopt hist_expire_dups_first
+#hist_ignore_space

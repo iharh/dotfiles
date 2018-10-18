@@ -1,0 +1,22 @@
+[user]
+	name = Ihar Hancharenka
+	email = iigoncharenko@gmail.com
+[credential]
+	helper = gnome-keyring
+[core]
+	autocrlf = input
+[alias]
+	a = add
+	purb = pull --rebase=merges
+	lgo = log --oneline --graph --decorate
+	st = status
+	ci = commit -a #-av
+	unstage = reset HEAD --
+	co = checkout
+	rbi = rebase --interactive
+	conf = config
+	cfg = config
+	br = branch
+	bra = branch -a
+	puso = push origin HEAD
+	fep = fetch -p

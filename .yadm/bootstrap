@@ -1,0 +1,63 @@
+#! /usr/bin/env bash
+
+bootstrap() {
+    install_nix
+    # upgrade_nix
+
+    echo "=============| begin install group | ============="
+    echo "=| core"
+    install curl
+    install git
+
+    echo "=| dotfile manager"
+    install yadm
+
+    echo "=| languages"
+    install cmake
+
+    # echo "=| utils"
+    # install calibre
+
+    # gc_nix
+}
+
+# =============================================================================
+
+command_exists()
+{
+    command -v "$1" >/dev/null 2>&1
+}
+
+install_nix()
+{
+    echo "=| nix"
+    if ! command_exists nix; then
+        echo "=> install"
+        curl -sL https://nixos.org/nix/install | sh >/dev/null 2>&1
+
+        source "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    fi
+}
+
+install()
+{
+    echo "==| $1"
+    if ! nix-env -qs "$1" >/dev/null 2>&1; then
+        # nix-env -i $1
+        nix-env -i $1 >/dev/null 2>&1
+    fi
+}
+
+upgrade_nix()
+{
+    echo "=> upgrade all packages"
+    nix-env -u >/dev/null 2>&1
+}
+
+gc_nix()
+{
+    echo "=> gc all packages"
+    nix-collect-garbage -d >/dev/null 2>&1
+}
+
+bootstrap

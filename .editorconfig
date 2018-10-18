@@ -1,0 +1,36 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+tab_width = 8
+max_line_length = 80
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# preferred guideline (if different to default one)
+[*.{js,json}]
+indent_size = 2
+
+# must (aka standard)
+[*.py]
+indent_size = 4
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.md]
+# trailing spaces in markdown indicate word wrap
+trim_trailing_whitespace = false
+tab_width = 4
+
+[Makefile]
+indent_style = tab
+
+# custom
+[*.lua]
+indent_size = 4
+
+[*.{txt,sh}]
+indent_size = 4

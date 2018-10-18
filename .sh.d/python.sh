@@ -1,0 +1,1 @@
+alias jpnb='jupyter notebook'

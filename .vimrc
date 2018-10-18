@@ -14,16 +14,23 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'bling/vim-bufferline'
 "Plug 'itchyny/lightline.vim'
 
-Plug 'ekalinin/Dockerfile.vim'
 Plug 'rking/ag.vim'
-Plug 'derekwyatt/vim-scala'
-Plug 'derekwyatt/vim-sbt'
-Plug 'udalov/kotlin-vim'
-Plug 'rust-lang/rust.vim'
-" Plug 'racer-rust/vim-racer'
-Plug 'leafgarland/typescript-vim'
-Plug 'digitaltoad/vim-pug'
-" Plug 'NLKNguyen/papercolor-theme'
+
+Plug 'sheerun/vim-polyglot'
+"Plug 'ekalinin/Dockerfile.vim'
+"Plug 'ekalinin/Dockerfile.vim'
+"Plug 'derekwyatt/vim-scala'
+"Plug 'derekwyatt/vim-sbt'
+"Plug 'udalov/kotlin-vim'
+"Plug 'rust-lang/rust.vim'
+"Plug 'leafgarland/typescript-vim'
+"Plug 'digitaltoad/vim-pug'
+
+Plug 'editorconfig/editorconfig-vim'
+"https://github.com/chriskempson/base16-vim/issues/197
+"https://github.com/chriskempson/base16-vim/pull/198/files
+"Plug 'chriskempson/base16-vim'
+Plug 'danielwe/base16-vim'
 
 " Add plugins to &runtimepath
 call plug#end()
@@ -37,6 +44,13 @@ let g:airline_powerline_fonts = 1
 " :AirlineTheme
 let g:airline_theme='badwolf'   " badwolf PaperColor
 
+" set while screen sharing
+
+set termguicolors
+set background=dark
+colorscheme base16-tomorrow-night
+let g:airline_theme='base16_tomorrow'
+
 "set background=light
 "colorscheme PaperColor
 
@@ -49,7 +63,7 @@ filet plugin indent on         " (filetype) - turn on file type detection.
 
 " fix tab behaviour in normal mode
 " Note the extra space after the second \
-set list lcs=tab:\ \ 
+set list lcs=tab:\ \
 
 " autocomplete for help works, but still have problems with file-path-names
 "set wildchar=9
@@ -95,7 +109,7 @@ set hh=40                           " helpheight
 
 " http://vim.wikia.com/wiki/Restore_cursor_to_file_position_in_previous_editing_session
 " This tip is an improved version of the example given for :help last-position-jump.
-" It fixes a problem where the cursor position will not be restored if the file only has a single line. 
+" It fixes a problem where the cursor position will not be restored if the file only has a single line.
 "
 " Tell vim to remember certain things when we exit
 "  '50  :  marks will be remembered for up to 10 previously edited files
@@ -146,40 +160,39 @@ endif
 "sw shiftwidth=2                 " And again, related.
 "et expandtab                    " Use spaces instead of tabs
 
-"au[tocmd] setl[ocal] 
+"au[tocmd] setl[ocal]
 "au setl sw=4 sts=4 et
-au FileType cpp setl sw=4 sts=4 et
-au FileType c setl sw=4 sts=4 et
-au FileType java setl sw=4 sts=4 et
-au FileType kotlin setl sw=4 sts=4 et
-au FileType scala setl sw=4 sts=4 et
-au FileType d setl sw=4 sts=4 et
-au FileType sdl setl sw=4 sts=4 et
-au FileType sbt setl sw=4 sts=4 et
-au FileType python setl sw=4 sts=4 et
-au FileType ruby setl sw=2 sts=2 et
-au FileType haskell setl sw=4 sts=4 noeol
-au FileType cabal setl sw=4 sts=4 noeol
-au FileType sql setl sw=4 sts=4 et
 au FileType ant setl sw=4 sts=4 et
-au FileType xml setl sw=4 sts=4 et
-au FileType html setl sw=4 sts=4 et
-au FileType text setl sw=4 sts=4 et noeol
+au FileType c setl sw=4 sts=4 et
+au FileType cabal setl sw=4 sts=4 noeol
+au FileType cpp setl sw=4 sts=4 et
 au FileType conf setl sw=4 sts=4 et noeol
-au FileType vim setl sw=4 sts=4 et
-au FileType javascript setl sw=4 sts=4 et
-au FileType nsis setl sw=4 sts=4 et
-au FileType groovy setl sw=4 sts=4 et
+au FileType d setl sw=4 sts=4 et
 au FileType Dockerfile setl sw=4 sts=4 et
 au FileType dosbatch setl sw=4 sts=4 et
+au FileType groovy setl sw=4 sts=4 et
+au FileType haskell setl sw=4 sts=4 noeol
+au FileType html setl sw=4 sts=4 et
+au FileType java setl sw=4 sts=4 et
+au FileType javascript setl sw=4 sts=4 et
 au FileType json setl sw=4 sts=4 et
-au FileType sh setl sw=4 sts=4 et
-au FileType zsh setl sw=4 sts=4 et
-au FileType proto setl sw=4 sts=4 et
+au FileType kotlin setl sw=4 sts=4 et
+au FileType nsis setl sw=4 sts=4 et
 au FileType perl setl sw=4 sts=4 et
-au FileType typescript setl sw=4 sts=4 et
+au FileType proto setl sw=4 sts=4 et
 au FileType pug setl sw=2 sts=2 et
+au FileType ruby setl sw=2 sts=2 et
+au FileType sbt setl sw=4 sts=4 et
+au FileType scala setl sw=4 sts=4 et
+au FileType sdl setl sw=4 sts=4 et
+au FileType sh setl sw=4 sts=4 et
+au FileType sql setl sw=4 sts=4 et
+au FileType text setl sw=4 sts=4 et noeol
+au FileType typescript setl sw=4 sts=4 et
+au FileType vim setl sw=4 sts=4 et
+au FileType xml setl sw=4 sts=4 et
 au FileType yaml setl sw=2 sts=2 et
+au FileType zsh setl sw=4 sts=4 et
 " for t in ['cpp', 'java', 'sql']  DOES NOT WORK
 " endfor
 " set ft - to check the current filetype
@@ -207,8 +220,8 @@ map <C-H>  :tabp<CR>
 
 " QuickFix navigation
 " http://blog.sofistes.net/2013/10/effective-quickfix-window-use-in-vim.html
-map <A-p> :cp<CR> 
-map <A-n> :cn<CR> 
+map <A-p> :cp<CR>
+map <A-n> :cn<CR>
 map <A-P> :colder<CR>
 map <A-N> :newer<CR>
 
@@ -273,3 +286,12 @@ inoremap <C-Y> <C-O><C-R>
 " restore visual mode selection after indenting
 vmap < <gv
 vmap > >gv
+
+" editorconfig
+let g:EditorConfig_max_line_indicator = "exceeding"
+let g:EditorConfig_preserve_formatoptions = "1"
+autocmd FileType * setlocal formatoptions-=t
+                         \ formatoptions-=c
+                         \ formatoptions-=r
+                         \ formatoptions-=o
+
