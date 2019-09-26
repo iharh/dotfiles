@@ -164,7 +164,7 @@ on-auth() {
     (cd $CLB_AUTH_SRV_DIR;\
         java \
             -Dspring.profiles.active=dev\
-            -jar build/libs/cb-auth-server-1.1.0.jar)
+            -jar build/libs/cb-auth-server-1.1.1.jar)
 }
 
 # default
