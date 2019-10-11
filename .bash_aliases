@@ -43,27 +43,8 @@ alias wrk='nmcli c up EpamVPN && remmina -c ~/.remmina/epbygomw0024t4.remmina'
 #wrk
 alias vpn-clb='sudo openvpn --config /data/wrk/ovpn/clb.ovpn'
 
-alias ssh-cps1='ssh ihar.hancharenka@d9-z01-lvpn-01.clarabridge.net'
-alias ssh-rr1='ssh ihar.hancharenka@roadrunner1.clarabridge.net'
-alias ssh-rr9='ssh ihar.hancharenka@roadrunner09.clarabridge.net'
-
-alias ssh-pd='ssh ihar.hancharenka@platform-dev.cbmain.clarabridge.com'
-
-alias curl-cps1-eur='curl cps1:8761/eureka/apps'
-
 #epam
 alias mcli='/usr/bin/java -jar /data/wrk/maestro-cli/lib/maestro-cli-full.jar'
-alias or2-help='mcli or2-help'
-alias or2-access='mcli or2-get-access'
-alias or2-dshapes='mcli or2-describe-shapes -p CLRA-NOC -r EPAM-UA1'
-alias or2-dim='mcli or2-describe-images -p CLRA-NOC -r EPAM-UA1'
-#or2-run
-#alias or2-din='mcli or2-describe-instances -p CLRA-NOC -r EPAM-UA1'
-alias or2-din='mcli or2-describe-instances -p CLRA-NOC -r EPAM-UA1 -i i-60508dc7'
-
-alias ssh-epam-i='ssh ihar_hancharenka@epam.com@ECSD001004F7.epam.com'
-alias ssh-epam-j='ssh jenkins@ECSD001004F7.epam.com'
-alias ssh-epam-m='ssh msa@ECSD001004F7.epam.com'
 
 #inet
 alias pingg='ping -c 4 google.com'

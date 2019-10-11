@@ -20,3 +20,6 @@
 	bra = branch -a
 	puso = push origin HEAD
 	fep = fetch -p
+[filesystem "Amazon.com Inc.|1.8.0_242|/dev/sda5"]
+	timestampResolution = 1001 milliseconds
+	minRacyThreshold = 0 nanoseconds

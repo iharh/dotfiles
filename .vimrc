@@ -169,6 +169,7 @@ au FileType cpp setl sw=4 sts=4 et
 au FileType conf setl sw=4 sts=4 et noeol
 au FileType d setl sw=4 sts=4 et
 au FileType Dockerfile setl sw=4 sts=4 et
+au FileType Jenkinsfile setl sw=4 sts=4 et
 au FileType dosbatch setl sw=4 sts=4 et
 au FileType groovy setl sw=4 sts=4 et
 au FileType haskell setl sw=4 sts=4 noeol

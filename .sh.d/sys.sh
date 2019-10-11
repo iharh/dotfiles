@@ -28,3 +28,6 @@ du1 () {
 #aur
 alias upu='yay -Syu' #alias upu='yaourt -Syu --aur'
 alias pacccl='paccache -rvk3'
+
+#dd
+alias dd-sdb='sudo dd bs=4M of=/dev/sdb status=progress oflag=sync' #if=<name>.iso

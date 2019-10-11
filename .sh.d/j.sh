@@ -1,8 +1,8 @@
-# wcd-like 
+# wcd-like
 j() {
   local files
 
-  ali=$(cat ~/alias.wcd | 
+  ali=$(cat ~/alias.wcd |
     while read line; do
       echo "$line"
     done | fzf -i +s -n1 -q "$*" -0 -1)
@@ -14,3 +14,5 @@ j() {
     cd $selected_dir
   fi
 }
+
+alias j11='sdk u java 11.0.4-amzn'

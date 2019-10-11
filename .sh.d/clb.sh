@@ -5,10 +5,20 @@ alias on-hq='sudo openconnect -u ihar.hancharenka vpn.clarabridge.com'
 
 export CLB_BASE_DIR=$WRK_DIR/clb
 export CLB_MST_DIR=$WRK_DIR/microstructure
-export CLB_AUTH_SRV_DIR=$CLB_MST_DIR/cb-auth-server
+export CLB_LIB_DIR=$CLB_BASE_DIR/lib
+export CLB_MSZ_DIR=$CLB_BASE_DIR/morfeusz/
+
+export CLB_AUTH_SRV_DIR=$CLB_BASE_DIR/cb-authentication-server
+export CLB_OLD_AUTH_SRV_DIR=$CLB_MST_DIR/cb-auth-server
 export CLB_SRC_DIR=$CLB_BASE_DIR/platform
 export CLB_FX_DIR=$CLB_BASE_DIR/fx
+export CLB_FX_MODULES_DIR=$CLB_FX_DIR/modules
 export CLB_LP_DIR=$CLB_FX_DIR/lang-packs
+export CLB_SVC_DIR=$CLB_FX_DIR/service
+export CLB_SVC_FX_DIR=$CLB_SVC_DIR/build/lib.fx
+export CLB_ING_DIR=$CLB_BASE_DIR/ingestion-gateway
+export CLB_INR_DIR=$CLB_BASE_DIR/ingestion-msg-router
+export CLB_MINIO_DIR=$CLB_BASE_DIR/minio
 export CB_NLP_GRADLE_CONTAINER_DIR=$CLB_BASE_DIR/.gradle-container
 export CLB_INST_HELPER_DIR=$WRK_DIR/wnotes/clb/inst
 export CLB_PRJ_HELPER_DIR=$WRK_DIR/prj/gra/kts/clb
@@ -18,35 +28,36 @@ export SQLCL_DIR=$WRK_DIR/sqlcl
 export CB_NLP_TENSORFLOW_SYN_HOST=localhost
 export CB_NLP_TENSORFLOW_SYN_PORT=0
 
-alias gra='gradle --warning-mode=all'
 alias granlp='gradle --warning-mode=all -Pbuild.type=nlp -Pnlp.workspace=$CLB_FX_DIR'
+
+gra() {
+    local GRADLE_OPTS="-Xmx16g -XX:MaxHeapSize=16g"
+    gradle --no-daemon --warning-mode=all $@
+}
 
 clb-misspel() {
     local LP_NAME="${1// }"
     local TARGET_DIR=$CLB_LP_DIR/$LP_NAME/resources/target
-    local log4j_ver=2.9.1
+    local log4j_ver=2.11.2
     if [[ -z $LP_NAME ]]; then
         echo "LP_NAME is EMPTY - skip configuring"
     else
-                # -jar $TARGET_DIR/lib/jfxapp.jar \
-                # -cp $TARGET_DIR/lib/log4j-slf4j-impl-$log4j_ver.jar:$TARGET_DIR/lib/log4j-core-$log4j_ver.jar:$TARGET_DIR/lib/log4j-api-$log4j_ver.jar:$TARGET_DIR/lib/jfxapp.jar\
-                # com.clarabridge.fx.Main\
-                # -properties $TARGET_DIR/lib/jfx.properties \
         (cd $TARGET_DIR;\
             export LD_LIBRARY_PATH=$TARGET_DIR/lib;\
             java \
                 -Dfile.encoding=utf-8 \
                 -Djava.library.path=$LD_LIBRARY_PATH \
                 -Dlog4j.debug=true \
-                -Dlog4j.configuration=file://$CLB_BASE_DIR/log4j.properties \
+                -Dlog4j.configuration=file://$CLB_LIB_DIR/log4j.properties \
                 -Dlog4j.configurationFile=lib/jfx.properties \
-                -cp lib/log4j-slf4j-impl-$log4j_ver.jar:lib/log4j-core-$log4j_ver.jar:lib/log4j-api-$log4j_ver.jar:lib/jfxapp.jar\
-                com.clarabridge.fx.Main\
+                -cp $CLB_LIB_DIR/log4j-slf4j-impl-$log4j_ver.jar:$CLB_LIB_DIR/log4j-core-$log4j_ver.jar:$CLB_LIB_DIR/log4j-api-$log4j_ver.jar:lib/jfxapp.jar\
+                com.clarabridge.fx.Main \
                 -config config-misspellings.xml \
                 -properties lib/jfx.properties \
                 -resbasedir . \
                 -result result-misspellings.xml \
-                misspellings.txt)
+                misspellings.txt\
+        )
     fi
 }
 
@@ -135,10 +146,9 @@ sql-cmp-setup() {
 # cb-eureka
 
 on-eureka() {
-    docker run --rm\
-        --name clb-eureka\
+    docker run --rm -d --name clb-eureka\
         -p 8761:8761\
-        docker-registry.clarabridge.net:5000/cb_plat/cb-eureka
+        gcr.io/cb-images/cb-eureka:1.1.2
 #      - server.port=8761
 #      - spring.cloud.client.hostname=eureka
 #      - eureka.instance.metadataMap.zone=usZone
@@ -150,6 +160,10 @@ on-eureka() {
 #      - eureka.server.enableSelfPreservation=true
 }
 
+off-eureka() {
+    docker stop clb-eureka
+}
+
 # cb-auth-server
 
 psql-auth () {
@@ -157,11 +171,26 @@ psql-auth () {
     psql -h localhost -d oauth -U postgres $@ # "$@"
 }
 
-on-auth() {
+run-auth() {
+    (cd $CLB_AUTH_SRV_DIR;\
+        java \
+            -Dmanagement.server.port=8086\
+            -jar build/libs/authentication-server-0.3.1.jar)
+}
+
+run-auth-eureka() {
+    (cd $CLB_AUTH_SRV_DIR;\
+        java \
+            -Dspring.profiles.active=eureka\
+            -Dmanagement.server.port=8086\
+            -jar build/libs/authentication-server-0.3.1.jar)
+}
+
+run-auth-old() {
             #-Deureka.client.registerWithEureka=false\
             #-Deureka.client.fetchRegistry=false\
             #-Dspring.datasource.url=jdbc:postgresql://postgres.clarabridge.net:5432/oauth\
-    (cd $CLB_AUTH_SRV_DIR;\
+    (cd $CLB_OLD_AUTH_SRV_DIR;\
         java \
             -Dspring.profiles.active=dev\
             -jar build/libs/cb-auth-server-1.1.1.jar)
@@ -203,27 +232,36 @@ clb-gra () {
     if [[ -z $TASK_NAME ]]; then
         echo "TASK_NAME is EMPTY - skip gradle build"
     else
-        # continuous nlp
-        # local CLB_BUILD_TYPE=nlp
-        local CLB_BUILD_TYPE=continuous
-        # ./gradlew gradle
         ./gradlew -Pbuild.type=$CLB_BUILD_TYPE -Pnlp.workspace=$CLB_FX_DIR $TASK_NAME "$@"
     fi
 }
 
 clb-b () {
-    local CLB_LOGB_DIR=$CLB_BASE_DIR/logb
-    local val_dt=`date +"%Y-%m-%d-%H-%M-%S"`
-    local CLB_LOG_DIR=$CLB_LOGB_DIR/$val_dt-cmp
-    mkdir $CLB_LOG_DIR
+    local CLB_BUILD_TYPE="${1// }"
+    shift
+    if [[ -z $CLB_BUILD_TYPE ]]; then
+        echo "CLB_BUILD_TYPE is EMPTY - skip gradle build"
+    else
+        local CLB_LOGB_DIR=$CLB_BASE_DIR/logb
+        local val_dt=`date +"%Y-%m-%d-%H-%M-%S"`
+        local CLB_LOG_DIR=$CLB_LOGB_DIR/$val_dt-cmp
+        mkdir $CLB_LOG_DIR
 
-    # local CLB_GRA_PROPS="-Pbuild.type=$CLB_BUILD_TYPE -Pnlp.workspace=$CLB_FX_DIR"
-    (cd $CLB_SRC_DIR;\
-        clb-gra clean "$@" 2>&1 | tee $CLB_LOG_DIR/clean.txt;\
-        clb-gra build "$@" 2>&1 | tee $CLB_LOG_DIR/build.txt;\
-        clb-gra build "$@" 2>&1 | tee $CLB_LOG_DIR/copy.txt
-    )
-    # clb-b-copy-artifacts
+        (cd $CLB_SRC_DIR;\
+            clb-gra clean "$@" 2>&1 | tee $CLB_LOG_DIR/clean.txt;\
+            clb-gra build "$@" 2>&1 | tee $CLB_LOG_DIR/build.txt;\
+            clb-gra build "$@" 2>&1 | tee $CLB_LOG_DIR/copy.txt
+        )
+        # clb-b-copy-artifacts
+    fi
+}
+
+clb-b-nlp () {
+    clb-b nlp
+}
+
+clb-b-cont () {
+    clb-b continuous
 }
 
 clb-gra-cfg() {
@@ -393,6 +431,37 @@ clb-un-ora() {
     rm -rf $CLB_LOG_DIR
 }
 
+clb-get-metrics() {
+    curl -u "admin:admin" "http://localhost:18080/mobile/rest/metrics"
+}
+
+# FX stuff
+
+fx-b() {
+    (cd $CLB_FX_DIR;\
+        ./container.sh -Pcore.ant.skip=true -Pmodules.ant.skip=true -Plp.ant.skip=true -Pservice.local=true $@)
+}
+
+cp-cape() {
+    cp $CLB_FX_MODULES_DIR/cape/target/linux-x64/lib*.* $CLB_SVC_FX_DIR/
+}
+
+cp-bd() {
+    cp $CLB_FX_MODULES_DIR/break-detector/target/linux-x64/lib*.* $CLB_SVC_FX_DIR/
+}
+
+cp-cte() {
+    cp $CLB_FX_MODULES_DIR/ctevaluation/target/ctevaluation.jar $CLB_SVC_FX_DIR/
+}
+
+cp-morph-pl() {
+    cp $CLB_FX_MODULES_DIR/morph_pl/build/libs/morph_pl*.jar $CLB_SVC_FX_DIR/morph_pl.jar
+}
+
+cp-msz() {
+    cp $CLB_MSZ_DIR/clb/javaprovider/build/libs/morfeuszprovider-linux-*.jar $CLB_SVC_FX_DIR/
+}
+
 # LP
 
 lp-make-inst-res() {
@@ -406,7 +475,7 @@ lp-make-inst-res() {
 # madamira-ar
 
 run-mdm() {
-    local MDM_DIR=$CLB_BASE_DIR/third-party/MADAMIRA
+    local MDM_DIR=$CLB_BASE_DIR/madamira
     local MDM_RELEASE_DIR=$MDM_DIR/release-20140725-1.0
 
     (cd $MDM_RELEASE_DIR;\
@@ -419,24 +488,121 @@ run-mdm() {
 # lttoolbox-bn
 
 on-ltt() {
-    docker run \
+    docker run --rm\
         -d --name my-lttoolbox-service-bn \
         -p 8091:8080 -p 9099:9090 \
-        cb-lttoolbox-bn:latest
+        gcr.io/cb-images/cb-nlp-bn-lttoolbox:0.8.0
 
         #cb-nlp-bn-lttoolbox:latest
 }
 
-# TF
 
-run-tf-hi() {
-    local CLB_UDR_DIR=$CLB_BASE_DIR/ud-research
+# rabbit
+on-rabbit () {
+    local RABBITMQ_SRC_DIR=$CLB_BASE_DIR/rabbitmq
+    # one-time: mkdir $RABBITMQ_SRC_DIR/mnesia
+    docker run --rm \
+        -d --name rabbitmq \
+        -p 4369:4369 \
+        -p 5671:5671 \
+        -p 5672:5672 \
+        -p 25672:25672 \
+        -p 15672:15672 \
+        -e RABBITMQ_DEFAULT_USER=user \
+        -e RABBITMQ_DEFAULT_PASS=password \
+        -v $RABBITMQ_SRC_DIR/mnesia:/var/lib/rabbitmq/mnesia:rw \
+        rabbitmq:3.8.0-management
+}
 
-    docker run -it -p 8500:8500 -v $CLB_UDR_DIR/models:/opt/ud-research/models docker-registry.clarabridge.net:5000/cb_nlp/dragnn-server-cpu:latest \
-    tensorflow_model_server \
-            --enable_batching \
-            --model_config_file=models/model_config_hi.txt \
-            --batching_parameters_file=models/batching_config.txt
+off-rabbit () {
+    docker stop rabbitmq
+}
+
+# mongo
+
+on-mongo () {
+    local MONGODB_SRC_DIR=$CLB_BASE_DIR/mongodb
+    # one-time: mkdir $MONGODB_SRC_DIR/mongodb
+    #   sudo chown :root $MONGODB_SRC_DIR && chmod g+rwX $MONGODB_SRC_DIR
+
+    # docker run --rm -ti \
+    #    -e ALLOW_EMPTY_PASSWORD=yes \
+    docker run --rm -d --name mongodb \
+        -p 27017:27017 \
+        -e MONGODB_USERNAME=admin \
+        -e MONGODB_PASSWORD=admin \
+        -e MONGODB_DATABASE=CB_Studio \
+        -e MONGODB_SYSTEM_LOG_VERBOSITY=2 \
+        -v $MONGODB_SRC_DIR:/bitnami:rw \
+        bitnami/mongodb:4.2.1-r28
+}
+
+off-mongo () {
+    docker stop mongodb
+}
+
+mongo-studio() {
+    mongo 'mongodb://admin:admin@127.0.0.1:27017/CB_Studio' $@
+}
+
+# ing
+
+on-ing() {
+    docker run -d \
+      --name ingestion-gateway \
+      --network=host \
+      -p 8123:8123 \
+      -e spring.profiles.active=mock,development \
+      -e spring.rabbitmq.host=localhost \
+      -e JAVA_OPTS='-Xms4g -Xmx4g -XX:NewSize=3g -XX:+AlwaysPreTouch' \
+      -e spring.kafka.bootstrap-servers=kafka-01:9092,kafka-02:9092 \
+      -e eureka.client.enabled=false \
+      -e eureka.client.serviceUrl.defaultZone=http://eureka-01:8443/eureka/,http://eureka-02:8443/eureka/ \
+      -e router.language.en=EN-P0-IN,EN-P1-IN \
+      -e router.fallback=ALL-P0-IN \
+      gcr.io/cb-images/cb-ingestion-gateway:0.2.1
+
+#      -e security.oauth2.client.client-id=my-ingestion-gateway \
+#      -e security.oauth2.client.client-secret=secret \
+#      -e security.oauth2.resource.token-info-uri=http://auth-server/oauth/check_token \
+}
+
+run-ing() {
+    #export SPRING_RABBITMQ_HOST=$HOST
+    #export SPRING_RABBITMQ_USERNAME=user
+    #export SPRING_RABBITMQ_PASSWORD=password
+
+    (cd $CLB_ING_DIR;\
+        java \
+            -Xms4g -Xmx4g -XX:NewSize=3g -XX:+AlwaysPreTouch \
+            -Dspring.profiles.active=mock,development \
+            -Dspring.rabbitmq.host=$HOST \
+            -Dspring.rabbitmq.username=user \
+            -Dspring.rabbitmq.password=password \
+            -Drouter.language.en=EN-P0-IN,EN-P1-IN \
+            -Drouter.fallback=ALL-P0-IN \
+            -jar build/libs/ingestion-gateway-0.2.1.jar
+    )
+}
+
+run-inr() {
+    (cd $CLB_INR_DIR;\
+        java \
+            -Dspring.profiles.active=mock,development \
+            -Dspring.rabbitmq.host=$HOST \
+            -Dspring.rabbitmq.username=user \
+            -Dspring.rabbitmq.password=password \
+            -jar build/libs/ingestion-msg-router-0.2.2.jar
+    )
+}
+
+# minio
+
+run-minio() {
+    (export MINIO_ACCESS_KEY=nlpsvc;\
+        export MINIO_SECRET_KEY=devsecret;\
+        minio server --compat $CLB_MINIO_DIR
+    )
 }
 
 # /cert-ignore -sec-tls
@@ -471,6 +637,94 @@ rdp-clb-hq-admin() {
         echo "HOST_ID is $HOST_ID..."
         xfreerdp /v:$HOST_ID /u:Administrator /gd:cbmain.clarabridge.com +clipboard /w:1600 /h:1150
     fi
+}
+
+# TF
+
+# clients shoud define the following env vars:
+# export CB_NLP_TENSORFLOW_SYN_HOST=<hostname>
+# export CB_NLP_TENSORFLOW_SYN_PORT=8500
+# export CB_NLP_TENSORFLOW_SYN_BATCHSIZE=500
+    #   bash -c "cd /opt/ud-research; pwd; ls -la models"
+
+on-tf-hi() {
+    docker run --rm\
+        --name clb-tf-hi\
+        -p 8500:8500\
+        -d gcr.io/cb-images/cb-nlp-tf-dragnn-server-cpu:0.10\
+        tensorflow_model_server \
+            --enable_batching \
+            --model_config_file=models/model_config_hi.txt \
+            --batching_parameters_file=models/batching_config.txt
+}
+
+off-tf-hi () {
+    docker stop clb-tf-hi
+}
+
+on-tf-fr() {
+    docker run --rm -it\
+        --name clb-tf-fr\
+        -p 8500:8500\
+        -d gcr.io/cb-images/cb-nlp-tf-dragnn-server-cpu:0.14\
+        tensorflow_model_server \
+            --enable_batching \
+            --model_config_file=models/model_config_fr.txt \
+            --batching_parameters_file=models/batching_config.txt
+}
+
+off-tf-fr () {
+    docker stop clb-tf-fr
+}
+
+on-tf-sv() {
+    docker run --rm\
+        --name clb-tf-sv\
+        -p 8500:8500\
+        -d gcr.io/cb-images/cb-nlp-tf-dragnn-server-cpu:0.10\
+        tensorflow_model_server \
+            --enable_batching \
+            --model_config_file=models/model_config_sv.txt \
+            --batching_parameters_file=models/batching_config.txt
+}
+
+off-tf-sv () {
+    docker stop clb-tf-sv
+}
+
+# spacy
+
+on-spacy-pl() {
+    # -ti\
+    docker run --rm\
+        -d --name clb-spacy-pl\
+        -p 8089:8089\
+        gcr.io/cb-images/cb-nlp-spacy-service-pl:0.1.4
+
+    # gunicorn --bind=0.0.0.0:8000 api:__hug_wsgi__ --error-logfile=-
+    # --bind=0.0.0.0:8000 --error-logfile=-
+
+    # clients shoud define the following env vars:
+    # export CB_NLP_SPACY_HTTP_HOST=localhost
+    # export CB_NLP_SPACY_HTTP_PORT=8089
+    # export CB_NLP_SPACY_HTTP_SCHEME=http
+    # export CB_NLP_SPACY_SERVICE_LANG=pl
+}
+
+off-spacy-pl () {
+    docker stop clb-spacy-pl
+}
+
+# devstack
+
+devstack() {
+    local CLB_DEVSTACK_DIR=$CLB_BASE_DIR/DevStack
+
+    (cd $CLB_DEVSTACK_DIR;\
+        export DEVSTACK_DIR=$CLB_DEVSTACK_DIR/clarabridge/nlp;\
+        ./devstack-linux $@
+    )
+    # devstack config --enable
 }
 
 alias rdp-bart='rdp-clb-sl bart01.clarabridge.net'

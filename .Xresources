@@ -7,6 +7,10 @@ Xft.hintstyle: hintslight
 !Xft.hintstyle: hintsfull
 Xft.lcdfilter: lcddefault
 
+xterm*font: xft:Hack:pixelsize=19:antialias=true
+xterm*background: #1d1f21
+xterm*foreground: #c5c8c6
+
 URxvt.termName: rxvt-unicode-256color
 !URxvt.urlLauncher: firefox
 
