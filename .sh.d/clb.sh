@@ -31,7 +31,7 @@ export CB_NLP_TENSORFLOW_SYN_PORT=0
 alias granlp='gradle --warning-mode=all -Pbuild.type=nlp -Pnlp.workspace=$CLB_FX_DIR'
 
 gra() {
-    local GRADLE_OPTS="-Xmx16g -XX:MaxHeapSize=16g"
+    # local GRADLE_OPTS="-Xmx16g -XX:MaxHeapSize=16g"
     gradle --no-daemon --warning-mode=all $@
 }
 
