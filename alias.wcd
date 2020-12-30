@@ -24,6 +24,7 @@ inr /data/wrk/clb/ingestion-msg-router
 its /data/wrk/clb/industry-templates
 nlpr /data/wrk/clb/nlp-resource-repository-service
 fxco /data/wrk/clb/fx/core
+fxit /data/wrk/clb/fx/i-tests
 fxmo /data/wrk/clb/fx/modules
 fxsvc /data/wrk/clb/fx/service
 fxsp /data/wrk/clb/fx/spikes
