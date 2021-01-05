@@ -1,6 +1,9 @@
 # docker
 alias on-doc='sudo systemctl start docker'
-alias off-doc='sudo systemctl stop docker'
+off-doc () {
+    sudo systemctl stop docker.socket
+    sudo systemctl stop docker
+}
 alias cfg-doc='sudo vim /etc/systemd/system/docker.service'
 
 alias doc-ps='docker ps -a'
