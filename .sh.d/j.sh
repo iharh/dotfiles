@@ -14,5 +14,3 @@ j() {
     cd $selected_dir
   fi
 }
-
-alias j11='sdk u java 11.0.4-amzn'
