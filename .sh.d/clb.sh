@@ -716,18 +716,16 @@ off-spacy-pl () {
 }
 
 on-tps() {
-    # -d --name clb-tps\
-    docker run --rm \
+    docker run --rm -d --name clb-tps\
         -p 8080:8080\
         -p 9090:9090\
+        -v $CLB_BASE_DIR/industry-templates:/opt/clarabridge/templates-storage:ro \
         -e eureka.client.enabled=false \
         -e storage.path=file:../templates-storage \
         -e clientDetailsFilePath=./clients/clientDetails.yml \
         -w /opt/clarabridge/templates-service \
         gcr.io/cb-images/cb-template-service:1.0.3 \
         java -jar cb-templates-1.0.3.jar
-#    volumes:
-#      - ../../../clb/industry-templates:/opt/clarabridge/templates-storage
 }
 
 off-tps() {
