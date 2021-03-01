@@ -15,6 +15,7 @@ export CLB_FX_DIR=$CLB_BASE_DIR/fx
 export CLB_FX_MODULES_DIR=$CLB_FX_DIR/modules
 export CLB_LP_DIR=$CLB_FX_DIR/lang-packs
 export CLB_SVC_DIR=$CLB_FX_DIR/service
+export CLB_NEW_FX_DIR=$CLB_FX_DIR/spikes/gra/native
 export CLB_SVC_FX_DIR=$CLB_SVC_DIR/build/lib.fx
 export CLB_ING_DIR=$CLB_BASE_DIR/ingestion-gateway
 export CLB_INR_DIR=$CLB_BASE_DIR/ingestion-msg-router
@@ -730,6 +731,12 @@ on-tps() {
 
 off-tps() {
     docker stop clb-tps
+}
+
+# misc stuff
+
+cp-regexp-en() {
+    cp $CLB_NEW_FX_DIR/shared-lib/regexp/build/lib/main/debug/*.so $CLB_NEW_FX_DIR/lang-packs/english/build/dist/
 }
 
 # devstack
