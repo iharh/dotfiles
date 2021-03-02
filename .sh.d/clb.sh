@@ -7,6 +7,7 @@ export CLB_BASE_DIR=$WRK_DIR/clb
 export CLB_MST_DIR=$WRK_DIR/microstructure
 export CLB_LIB_DIR=$CLB_BASE_DIR/lib
 export CLB_MSZ_DIR=$CLB_BASE_DIR/morfeusz/
+export CLB_DIM_DIR=$CLB_BASE_DIR/docker-images
 
 export CLB_AUTH_SRV_DIR=$CLB_BASE_DIR/cb-authentication-server
 export CLB_OLD_AUTH_SRV_DIR=$CLB_MST_DIR/cb-auth-server
@@ -333,7 +334,14 @@ clb-fill-pg() {
     psql-cmp -f $CLB_INST_HELPER_PG_SCRIPT_DIR/pg_fill_lin.sql -a -e
 }
 
+print-adv-host() {
+    # enp2s0 - home, enp0s8 - wrk, vb
+    ip -o -4 a | cut -d ' ' -f 2,7 | grep enp | head -1 | cut -d ' ' -f 2 | cut -d '/' -f 1
+}
+
 run-cmp() {
+    local ADV_HOST=$(print-adv-host)
+
     local CLB_INST_DIR=$CLB_BASE_DIR/inst
     local CLB_SERVER_DIR=$CLB_INST_DIR/server
 
@@ -345,10 +353,6 @@ run-cmp() {
 
     #local JPDA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=4142"
     local JPDA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4142"
-
-    # enp2s0 - home, enp0s8 - wrk, vb
-    local ADV_HOST=$(ip -o -4 a | cut -d ' ' -f 2,7 | grep enp | head -1 | cut -d ' ' -f 2 | cut -d '/' -f 1)
-
 
     (cd $CLB_SERVER_DIR/bin;\
         export LD_LIBRARY_PATH="$CLB_INST_DIR/fx:$LD_LIBRARY_PATH";\
@@ -737,6 +741,51 @@ off-tps() {
 
 cp-regexp-en() {
     cp $CLB_NEW_FX_DIR/shared-lib/regexp/build/lib/main/debug/*.so $CLB_NEW_FX_DIR/lang-packs/english/build/dist/
+}
+
+# es6
+
+doc-build-es6() {
+    local ES_VERSION=6.8.13
+    local ES_PLUGIN_VERSION=102
+    local IMAGE=cb-elasticsearch6:$ES_VERSION.$ES_PLUGIN_VERSION
+
+    local NEXUS_IP="${1// }"
+    if [[ -z $NEXUS_IP ]]; then
+        echo "NEXUS_IP is EMPTY - skipping..."
+    else
+    #   docker build -t $(IMAGE) --pull
+        local NEXUS_URL=http://$NEXUS_IP:8081/content/groups/public
+        docker build -t $IMAGE --build-arg ES_VERSION=$ES_VERSION --build-arg PLUGIN_VERSION=$ES_PLUGIN_VERSION --build-arg NEXUS_URL=$NEXUS_URL $CLB_DIM_DIR/cb-elasticsearch/6
+    fi
+}
+
+on-es6() {
+    local ADV_HOST=$(print-adv-host)
+
+    # -p 5005:5005 ^
+    # -e ES_JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n" ^
+
+    #sudo vim /etc/sysctl.conf
+    # and set vm.max_map_count to 262144.
+    # sysctl vm.max_map_count
+    # sudo sysctl -w vm.max_map_count=262144
+
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html
+    # -d --name es6
+
+    docker run --rm -it \
+        -p 9200:9200 \
+        -p 9300:9300 \
+        -e cluster.name=$HOST \
+        -e transport.publish_host=$ADV_HOST \
+        -e transport.publish_port=9300 \
+        -e http.publish_host=$ADV_HOST \
+        -e http.publish_port=9200 \
+        -e indices.query.bool.max_clause_count=10240 \
+        -e discovery.type=single-node \
+        cb-elasticsearch6:6.8.13.102 \
+        bin/elasticsearch
 }
 
 # devstack
