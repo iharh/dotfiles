@@ -760,32 +760,36 @@ doc-build-es6() {
     fi
 }
 
+# sudo vim /etc/sysctl.d/99-sysctl.conf
+# and set vm.max_map_count to 262144.
+# sudo sysctl --system
+# sysctl vm.max_map_count
+# sudo sysctl -w vm.max_map_count=262144
+
 on-es6() {
+    local ES6_SRC_DIR=$CLB_BASE_DIR/es6
     local ADV_HOST=$(print-adv-host)
-
-    # -p 5005:5005 ^
-    # -e ES_JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n" ^
-
-    #sudo vim /etc/sysctl.conf
-    # and set vm.max_map_count to 262144.
-    # sysctl vm.max_map_count
-    # sudo sysctl -w vm.max_map_count=262144
-
-    # https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html
-    # -d --name es6
-
+    #    -p 5005:5005 \
+    #    -e ES_JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n" \
     docker run --rm -it \
+        -d --name es6 \
+        --user "$(id -u):$(id -g)"\
         -p 9200:9200 \
         -p 9300:9300 \
-        -e cluster.name=$HOST \
+        -e cluster.name=ih-cluster \
+        -e node.name=ih-node \
         -e transport.publish_host=$ADV_HOST \
         -e transport.publish_port=9300 \
         -e http.publish_host=$ADV_HOST \
         -e http.publish_port=9200 \
         -e indices.query.bool.max_clause_count=10240 \
         -e discovery.type=single-node \
-        cb-elasticsearch6:6.8.13.102 \
-        bin/elasticsearch
+        -v $ES6_SRC_DIR/data:/usr/share/elasticsearch/data:rw \
+        cb-elasticsearch6:6.8.13.102
+}
+
+off-es6() {
+    docker stop es6
 }
 
 # devstack
