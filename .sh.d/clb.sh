@@ -177,7 +177,7 @@ run-auth() {
     (cd $CLB_AUTH_SRV_DIR;\
         java \
             -Dmanagement.server.port=8086\
-            -jar build/libs/authentication-server-0.3.1.jar)
+            -jar build/libs/authentication-server-0.5.6.jar)
 }
 
 run-auth-eureka() {
@@ -185,7 +185,7 @@ run-auth-eureka() {
         java \
             -Dspring.profiles.active=eureka\
             -Dmanagement.server.port=8086\
-            -jar build/libs/authentication-server-0.3.1.jar)
+            -jar build/libs/authentication-server-0.5.6.jar)
 }
 
 run-auth-old() {
@@ -351,8 +351,25 @@ run-cmp() {
     rm -rf $CLB_SERVER_DIR/logs
     mkdir $CLB_SERVER_DIR/logs
 
-    #local JPDA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=4142"
+    #local JPDA_OPTS="-Xdebug ..."
     local JPDA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4142"
+
+    # TODO: !!! FIX common.loader at catalina.properties
+
+    # put this to conf/elasticsearch-custom.yml
+    # cb.classification.kafka.bootstrap.servers: ihdesk:9092
+    # cluster.name: ih-cluster
+    # client.transport.addresses: ihdesk:9300
+
+    #security.sso.oauth2.client-id=dev
+    #security.sso.oauth2.client-secret=devsecret
+    #security.sso.oauth2.redirect-uri=http://$ADV_HOST:18080/cmp/analyze
+
+    #security.sso.oauth2.base-uri=${security.oauth2.baseUrl}
+    #security.sso.oauth2.status-uri=${security.sso.oauth2.base-uri}/oauth/status
+    #security.sso.oauth2.access-token-uri=${security.sso.oauth2.base-uri}/oauth/token
+    #security.sso.oauth2.check-token-uri=${security.sso.oauth2.base-uri}/oauth/check_token
+    #security.sso.oauth2.revoke-token-uri=${security.sso.oauth2.base-uri}/oauth/tokens
 
     (cd $CLB_SERVER_DIR/bin;\
         export LD_LIBRARY_PATH="$CLB_INST_DIR/fx:$LD_LIBRARY_PATH";\
@@ -365,13 +382,26 @@ run-cmp() {
         -Dkafka.cb.zookeeper.servers=$ADV_HOST:2181\
         -Djava.util.logging.config.file=$CLB_SERVER_DIR/conf/logging.properties\
         -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager\
-        -Dcatalina.es.version=1x\
         -Djava.endorsed.dirs="$CLB_SERVER_DIR/endorsed"\
         -classpath "$CLB_SERVER_DIR/bin/bootstrap.jar:$CLB_SERVER_DIR/bin/tomcat-juli.jar"\
         -Dcatalina.base="$CLB_SERVER_DIR"\
         -Dcatalina.home="$CLB_SERVER_DIR"\
         -Djava.io.tmpdir="$CLB_SERVER_DIR/temp"\
         -Djava.library.path="$CLB_INST_DIR/fx"\
+        -Dcatalina.es.version=6x\
+        -Dshow.rate=true\
+        -Dindex.cluster.data=false\
+        -Dindex.cluster.name=$ADV_HOST\
+        -Dcmp.instance.name=cmp-dev\
+        -Dcloud.bucket=cmp-dev\
+        -Dclient.transport.ignore_cluster_name=true\
+        -Dclient.transport.addresses=$ADV_HOST:9300\
+        -Dclassification.support.enabled=true\
+        -Dsecurity.sso.oauth2.client-id=nlpsvc\
+        -Dsecurity.sso.oauth2.client-secret=devsecret\
+        -Dsecurity.sso.oauth2.redirect-uri=http://$ADV_HOST:18080/cmp/analyze\
+        -Deureka.client.enabled=true\
+        -Dfeign.clients.mappings.TemplatesService=http://ts \
         -javaagent:"$CLB_SERVER_DIR/lib.cb/clarabridge-memory-agent.jar"\
         org.apache.catalina.startup.Bootstrap start)
 }
@@ -721,11 +751,14 @@ off-spacy-pl () {
 }
 
 on-tps() {
-    docker run --rm -d --name clb-tps\
+    # -d --name clb-tps
+    docker run --rm \
+        --network host\
         -p 8080:8080\
         -p 9090:9090\
         -v $CLB_BASE_DIR/industry-templates:/opt/clarabridge/templates-storage:ro \
-        -e eureka.client.enabled=false \
+        -e eureka.client.enabled=true \
+        -e spring.cloud.client.hostname=$HOST \
         -e storage.path=file:../templates-storage \
         -e clientDetailsFilePath=./clients/clientDetails.yml \
         -w /opt/clarabridge/templates-service \
@@ -790,6 +823,11 @@ on-es6() {
 
 off-es6() {
     docker stop es6
+}
+
+put-cluster-settings-es() {
+    curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_cluster/settings \
+        -d '{"persistent": {"cb.classification.kafka.bootstrap.servers": "ihdesk:9092"}}'
 }
 
 # devstack

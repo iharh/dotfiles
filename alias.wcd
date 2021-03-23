@@ -31,6 +31,7 @@ fxsp /data/wrk/clb/fx/spikes
 lpsc /data/wrk/clb/fx/lp/schemes
 lpar /data/wrk/clb/fx/lang-packs/arabic
 lpbn /data/wrk/clb/fx/lang-packs/bengali
+lpzh /data/wrk/clb/fx/lang-packs/chinese
 lpen /data/wrk/clb/fx/lang-packs/english
 lpde /data/wrk/clb/fx/lang-packs/german
 lpes /data/wrk/clb/fx/lang-packs/spanish
