@@ -37,6 +37,8 @@ gra() {
     gradle --no-daemon --warning-mode=all $@
 }
 
+# misspell
+
 clb-misspel() {
     local LP_NAME="${1// }"
     local TARGET_DIR=$CLB_LP_DIR/$LP_NAME/resources/target
@@ -68,6 +70,34 @@ clb-en-misspel() {
 }
 clb-de-misspel() {
     clb-misspel german
+}
+
+# morph5
+
+clb-morph5() {
+    local MORPH_NAME=abc
+    local LP_NAME="${1// }"
+    local LP_DIST_DIR=$CLB_LP_DIR/$LP_NAME/dist
+    if [[ -z $LP_NAME ]]; then
+        echo "LP_NAME is EMPTY - skip morph5 build"
+    else
+        local LP_CODE="${2// }"
+        if [[ -z $LP_CODE ]]; then
+            echo "LP_CODE is EMPTY - skip morph5 build"
+        else
+            (cd $LP_DIST_DIR;\
+                cp $CLB_FX_MODULES_DIR/build_morph5/target/linux-x64/build_* .;\
+                export LD_LIBRARY_PATH=$LP_DIST_DIR;\
+                ./build_morph5 -min -s ./$LP_CODE/scheme/$LP_NAME.scheme -o ./$LP_CODE/morph/$MORPH_NAME.morph\
+                    -graph ./$LP_CODE/morph/$MORPH_NAME.dot\
+                    $CLB_LP_DIR/$LP_NAME/resources/morph/$MORPH_NAME.morph\
+            )
+        fi
+    fi
+}
+
+clb-tl-morph5() {
+    clb-morph5 tagalog tl
 }
 
 # PG
