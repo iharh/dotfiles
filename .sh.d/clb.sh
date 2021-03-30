@@ -860,6 +860,20 @@ put-cluster-settings-es() {
         -d '{"persistent": {"cb.classification.kafka.bootstrap.servers": "ihdesk:9092"}}'
 }
 
+# ernie
+
+doc-build-ernie() {
+    (cd $CLB_DIM_DIR/cb-nlp-ernie;\
+        docker build -t cb-nlp/cb-nlp-ernie:latest --pull .
+    )
+}
+
+doc-build-ernie-serving() {
+    (cd $CLB_DIM_DIR/cb-nlp-ernie-serving;\
+        docker build -t cb-nlp/cb-nlp-ernie-serving:latest --pull .
+    )
+}
+
 # devstack
 
 devstack() {
