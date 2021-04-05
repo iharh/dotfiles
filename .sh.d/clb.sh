@@ -874,6 +874,22 @@ doc-build-ernie-serving() {
     )
 }
 
+on-ernie() {
+    (cd $CLB_MST_DIR/compose/ernie;\
+        ./dco-up.sh
+    )
+}
+
+off-ernie() {
+    (cd $CLB_MST_DIR/compose/ernie;\
+        ./dco-down.sh
+    )
+}
+
+make-ernie-tmp() {
+    docker exec -it ernie mkdir server/tmp
+}
+
 # devstack
 
 devstack() {
