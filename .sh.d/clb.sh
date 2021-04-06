@@ -716,7 +716,7 @@ on-tf-hi() {
     docker run --rm\
         --name clb-tf-hi\
         -p 8500:8500\
-        -d gcr.io/cb-images/cb-nlp-tf-dragnn-server-cpu:0.10\
+        -d gcr.io/cb-images/cb-nlp-tf-dragnn-server-cpu:0.14\
         tensorflow_model_server \
             --enable_batching \
             --model_config_file=models/model_config_hi.txt \
@@ -746,7 +746,7 @@ on-tf-sv() {
     docker run --rm\
         --name clb-tf-sv\
         -p 8500:8500\
-        -d gcr.io/cb-images/cb-nlp-tf-dragnn-server-cpu:0.10\
+        -d gcr.io/cb-images/cb-nlp-tf-dragnn-server-cpu:0.14\
         tensorflow_model_server \
             --enable_batching \
             --model_config_file=models/model_config_sv.txt \
