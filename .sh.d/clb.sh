@@ -27,9 +27,6 @@ export CLB_PRJ_HELPER_DIR=$WRK_DIR/prj/gra/kts/clb
 
 export SQLCL_DIR=$WRK_DIR/sqlcl
 
-export CB_NLP_TENSORFLOW_SYN_HOST=localhost
-export CB_NLP_TENSORFLOW_SYN_PORT=0
-
 alias granlp='gradle --warning-mode=all -Pbuild.type=nlp -Pnlp.workspace=$CLB_FX_DIR'
 
 gra() {
@@ -550,18 +547,6 @@ run-mdm() {
         -s -msaonly)
 }
 
-# lttoolbox-bn
-
-on-ltt() {
-    docker run --rm\
-        -d --name my-lttoolbox-service-bn \
-        -p 8091:8080 -p 9099:9090 \
-        gcr.io/cb-images/cb-nlp-bn-lttoolbox:0.8.0
-
-        #cb-nlp-bn-lttoolbox:latest
-}
-
-
 # rabbit
 on-rabbit () {
     local RABBITMQ_SRC_DIR=$CLB_BASE_DIR/rabbitmq
@@ -757,28 +742,7 @@ off-tf-sv () {
     docker stop clb-tf-sv
 }
 
-# spacy
-
-on-spacy-pl() {
-    # -ti\
-    docker run --rm\
-        -d --name clb-spacy-pl\
-        -p 8089:8089\
-        gcr.io/cb-images/cb-nlp-spacy-service-pl:0.1.4
-
-    # gunicorn --bind=0.0.0.0:8000 api:__hug_wsgi__ --error-logfile=-
-    # --bind=0.0.0.0:8000 --error-logfile=-
-
-    # clients shoud define the following env vars:
-    # export CB_NLP_SPACY_HTTP_HOST=localhost
-    # export CB_NLP_SPACY_HTTP_PORT=8089
-    # export CB_NLP_SPACY_HTTP_SCHEME=http
-    # export CB_NLP_SPACY_SERVICE_LANG=pl
-}
-
-off-spacy-pl () {
-    docker stop clb-spacy-pl
-}
+# tps
 
 on-tps() {
     # -d --name clb-tps

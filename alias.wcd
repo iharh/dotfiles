@@ -1,6 +1,7 @@
 notes /data/wrk/notes
 wnote /data/wrk/wnotes
 acnt /data/wrk/ant-contrib
+chef /data/wrk/clb/chef
 repo /data/wrk/repo
 jft /data/wrk/repo/JFastText
 prj /data/wrk/prj
@@ -48,10 +49,10 @@ logb /data/wrk/clb/logb
 logss /data/wrk/clb/inst/server/logs
 msz /data/wrk/clb/morfeusz
 nlpsp /data/wrk/clb/nlp-spikes
-chef /data/wrk/clb/chef
 dpt /data/wrk/deep-thought
 tps /data/wrk/template-service
 mst /data/wrk/microstructure
 qaa /data/wrk/QAAutomation
 down /data/wrk/down
+spacy /data/wrk/clb/nlp-spacy-service
 sql /data/wrk/clb/platform/cmp/server/core/src/runtime/resources/sql
