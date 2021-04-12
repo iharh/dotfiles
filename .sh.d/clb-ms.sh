@@ -15,13 +15,17 @@ gcr-img-ltt-bn() {
     gcr-img cb-nlp-bn-lttoolbox
 }
 
-on-ltt() {
+on-ltt-clb() {
     docker run --rm\
-        -d --name my-lttoolbox-service-bn \
+        -d --name clb-lttoolbox-service-bn \
         -p 8091:8080 -p 9099:9090 \
         gcr.io/cb-images/cb-nlp-bn-lttoolbox:0.8.0
 
         #cb-nlp-bn-lttoolbox:latest
+}
+
+off-ltt-bn() {
+    docker stop clb-lttoolbox-service-bn
 }
 
 # spacy
