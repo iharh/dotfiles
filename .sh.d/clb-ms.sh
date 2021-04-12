@@ -15,7 +15,7 @@ gcr-img-ltt-bn() {
     gcr-img cb-nlp-bn-lttoolbox
 }
 
-on-ltt-clb() {
+on-ltt-bn() {
     docker run --rm\
         -d --name clb-lttoolbox-service-bn \
         -p 8091:8080 -p 9099:9090 \
