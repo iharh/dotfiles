@@ -689,59 +689,6 @@ rdp-clb-hq-admin() {
     fi
 }
 
-# TF
-
-# clients shoud define the following env vars:
-# export CB_NLP_TENSORFLOW_SYN_HOST=<hostname>
-# export CB_NLP_TENSORFLOW_SYN_PORT=8500
-# export CB_NLP_TENSORFLOW_SYN_BATCHSIZE=500
-    #   bash -c "cd /opt/ud-research; pwd; ls -la models"
-
-on-tf-hi() {
-    docker run --rm\
-        --name clb-tf-hi\
-        -p 8500:8500\
-        -d gcr.io/cb-images/cb-nlp-tf-dragnn-server-cpu:0.14\
-        tensorflow_model_server \
-            --enable_batching \
-            --model_config_file=models/model_config_hi.txt \
-            --batching_parameters_file=models/batching_config.txt
-}
-
-off-tf-hi () {
-    docker stop clb-tf-hi
-}
-
-on-tf-fr() {
-    docker run --rm -it\
-        --name clb-tf-fr\
-        -p 8500:8500\
-        -d gcr.io/cb-images/cb-nlp-tf-dragnn-server-cpu:0.14\
-        tensorflow_model_server \
-            --enable_batching \
-            --model_config_file=models/model_config_fr.txt \
-            --batching_parameters_file=models/batching_config.txt
-}
-
-off-tf-fr () {
-    docker stop clb-tf-fr
-}
-
-on-tf-sv() {
-    docker run --rm\
-        --name clb-tf-sv\
-        -p 8500:8500\
-        -d gcr.io/cb-images/cb-nlp-tf-dragnn-server-cpu:0.14\
-        tensorflow_model_server \
-            --enable_batching \
-            --model_config_file=models/model_config_sv.txt \
-            --batching_parameters_file=models/batching_config.txt
-}
-
-off-tf-sv () {
-    docker stop clb-tf-sv
-}
-
 # tps
 
 on-tps() {
