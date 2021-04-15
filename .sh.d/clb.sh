@@ -7,7 +7,6 @@ export CLB_BASE_DIR=$WRK_DIR/clb
 export CLB_MST_DIR=$WRK_DIR/microstructure
 export CLB_LIB_DIR=$CLB_BASE_DIR/lib
 export CLB_MSZ_DIR=$CLB_BASE_DIR/morfeusz/
-export CLB_DIM_DIR=$CLB_BASE_DIR/docker-images
 
 export CLB_AUTH_SRV_DIR=$CLB_BASE_DIR/cb-authentication-server
 export CLB_OLD_AUTH_SRV_DIR=$CLB_MST_DIR/cb-auth-server
@@ -715,90 +714,6 @@ off-tps() {
 
 cp-regexp-en() {
     cp $CLB_NEW_FX_DIR/shared-lib/regexp/build/lib/main/debug/*.so $CLB_NEW_FX_DIR/lang-packs/english/build/dist/
-}
-
-# es6
-
-doc-build-es6() {
-    local ES_VERSION=6.8.13
-    local ES_PLUGIN_VERSION=102
-    local IMAGE=cb-elasticsearch6:$ES_VERSION.$ES_PLUGIN_VERSION
-
-    local NEXUS_IP="${1// }"
-    if [[ -z $NEXUS_IP ]]; then
-        echo "NEXUS_IP is EMPTY - skipping..."
-    else
-    #   docker build -t $(IMAGE) --pull
-        local NEXUS_URL=http://$NEXUS_IP:8081/content/groups/public
-        docker build -t $IMAGE --build-arg ES_VERSION=$ES_VERSION --build-arg PLUGIN_VERSION=$ES_PLUGIN_VERSION --build-arg NEXUS_URL=$NEXUS_URL $CLB_DIM_DIR/cb-elasticsearch/6
-    fi
-}
-
-# sudo vim /etc/sysctl.d/99-sysctl.conf
-# and set vm.max_map_count to 262144.
-# sudo sysctl --system
-# sysctl vm.max_map_count
-# sudo sysctl -w vm.max_map_count=262144
-
-on-es6() {
-    local ES6_SRC_DIR=$CLB_BASE_DIR/es6
-    local ADV_HOST=$(print-adv-host)
-    #    -p 5005:5005 \
-    #    -e ES_JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n" \
-    docker run --rm -it \
-        -d --name es6 \
-        --user "$(id -u):$(id -g)"\
-        -p 9200:9200 \
-        -p 9300:9300 \
-        -e cluster.name=ih-cluster \
-        -e node.name=ih-node \
-        -e transport.publish_host=$ADV_HOST \
-        -e transport.publish_port=9300 \
-        -e http.publish_host=$ADV_HOST \
-        -e http.publish_port=9200 \
-        -e indices.query.bool.max_clause_count=10240 \
-        -e discovery.type=single-node \
-        -v $ES6_SRC_DIR/data:/usr/share/elasticsearch/data:rw \
-        cb-elasticsearch6:6.8.13.102
-}
-
-off-es6() {
-    docker stop es6
-}
-
-put-cluster-settings-es() {
-    curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_cluster/settings \
-        -d '{"persistent": {"cb.classification.kafka.bootstrap.servers": "ihdesk:9092"}}'
-}
-
-# ernie
-
-doc-build-ernie() {
-    (cd $CLB_DIM_DIR/cb-nlp-ernie;\
-        docker build -t cb-nlp/cb-nlp-ernie:latest --pull .
-    )
-}
-
-doc-build-ernie-serving() {
-    (cd $CLB_DIM_DIR/cb-nlp-ernie-serving;\
-        docker build -t cb-nlp/cb-nlp-ernie-serving:latest --pull .
-    )
-}
-
-on-ernie() {
-    (cd $CLB_MST_DIR/compose/ernie;\
-        ./dco-up.sh
-    )
-}
-
-off-ernie() {
-    (cd $CLB_MST_DIR/compose/ernie;\
-        ./dco-down.sh
-    )
-}
-
-make-ernie-tmp() {
-    docker exec -it ernie mkdir server/tmp
 }
 
 # devstack
