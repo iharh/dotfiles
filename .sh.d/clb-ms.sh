@@ -32,6 +32,10 @@ off-ltt-bn() {
 
 # spacy
 
+export CB_NLP_SPACY_HTTP_SCHEME=http
+export CB_NLP_SPACY_HTTP_HOST=localhost
+export CB_NLP_SPACY_HTTP_PORT=8089
+
 gcr-img-spacy-pl() {
     gcr-img cb-nlp-spacy-service-pl
 }
@@ -198,6 +202,10 @@ make-ernie-tmp() {
 }
 
 # chapters
+
+# export CB_NLP_CHAPTERS_HTTP_SCHEME=http
+# export CB_NLP_CHAPTERS_HTTP_HOST=localhost
+# export CB_NLP_CHAPTERS_HTTP_PORT=8092
 
 on-chapters() {
     (cd $CLB_BASE_DIR/nlp-chapters-service;\
