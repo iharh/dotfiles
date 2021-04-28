@@ -32,9 +32,30 @@ off-ltt-bn() {
 
 # spacy
 
-export CB_NLP_SPACY_HTTP_SCHEME=http
-export CB_NLP_SPACY_HTTP_HOST=localhost
-export CB_NLP_SPACY_HTTP_PORT=8089
+#export CB_NLP_SPACY_HTTP_SCHEME=http
+#export CB_NLP_SPACY_HTTP_HOST=localhost
+#export CB_NLP_SPACY_HTTP_PORT=8089
+
+#export CB_NLP_SPACY_HTTP_SCHEME=https
+#export CB_NLP_SPACY_HTTP_HOST=nlp-spacy-service-it.cbplatform.com
+#export CB_NLP_SPACY_HTTP_PORT=443
+
+gcr-img-spacy-en() {
+    gcr-img cb-nlp-spacy-service-pl
+}
+
+on-spacy-en() {
+    docker run --rm\
+        -d --name clb-spacy-en\
+        -p 8089:8089\
+        gcr.io/cb-images/cb-nlp-spacy-service-en:0.2.0-7c91045
+}
+
+off-spacy-en () {
+    docker stop clb-spacy-en
+}
+
+#curl -H "Content-Type:application/octet-stream" --data "CiBubHAtc3BhY3ktdGVzdGluZy1wb2xpc2gtcmVxdWVzdBI+CgYKBFBpZXMKBAoCamUKCgoId8WCb3NrxIUKCAoGcGl6esSZCgMKAXoKDgoMTm93ZWdvIEpvcmt1CgMKAS4SWwoDCgFXCggKBlBvbHNjZQoGCgR6aW1hCgYKBGplc3QKCAoGZMWCdWdhCgMKASwKBQoDYWxlCggKBmx1ZHppZQoMCgpyb3pncnplasSFCgcKBXNlcmNlCgMKASE=" https://nlp-spacy-service-en.cbplatform.com:443/api/process
 
 gcr-img-spacy-pl() {
     gcr-img cb-nlp-spacy-service-pl
@@ -45,21 +66,36 @@ on-spacy-pl() {
     docker run --rm\
         -d --name clb-spacy-pl\
         -p 8089:8089\
-        gcr.io/cb-images/cb-nlp-spacy-service-pl:0.2.0-2ceb112
+        gcr.io/cb-images/cb-nlp-spacy-service-pl:0.2.0-7c91045
 
     # gunicorn --bind=0.0.0.0:8000 api:__hug_wsgi__ --error-logfile=-
     # --bind=0.0.0.0:8000 --error-logfile=-
 
     # clients shoud define the following env vars:
-    # export CB_NLP_SPACY_HTTP_HOST=localhost
-    # export CB_NLP_SPACY_HTTP_PORT=8089
-    # export CB_NLP_SPACY_HTTP_SCHEME=http
     # export CB_NLP_SPACY_SERVICE_LANG=pl
 }
 
 off-spacy-pl () {
     docker stop clb-spacy-pl
 }
+
+gcr-img-spacy-it() {
+    gcr-img cb-nlp-spacy-service-it
+}
+
+on-spacy-it() {
+    # -ti\
+    docker run --rm\
+        -d --name clb-spacy-it\
+        -p 8089:8089\
+        gcr.io/cb-images/cb-nlp-spacy-service-it:0.2.0-7c91045
+}
+
+off-spacy-it () {
+    docker stop clb-spacy-it
+}
+
+#curl -H "Content-Type:application/octet-stream" --data "CiBubHAtc3BhY3ktdGVzdGluZy1wb2xpc2gtcmVxdWVzdBI+CgYKBFBpZXMKBAoCamUKCgoId8WCb3NrxIUKCAoGcGl6esSZCgMKAXoKDgoMTm93ZWdvIEpvcmt1CgMKAS4SWwoDCgFXCggKBlBvbHNjZQoGCgR6aW1hCgYKBGplc3QKCAoGZMWCdWdhCgMKASwKBQoDYWxlCggKBmx1ZHppZQoMCgpyb3pncnplasSFCgcKBXNlcmNlCgMKASE=" https://nlp-spacy-service-it.cbplatform.com:443/api/process
 
 #curl -H "Content-Type:application/octet-stream" --data "CiBubHAtc3BhY3ktdGVzdGluZy1wb2xpc2gtcmVxdWVzdBI+CgYKBFBpZXMKBAoCamUKCgoId8WCb3NrxIUKCAoGcGl6esSZCgMKAXoKDgoMTm93ZWdvIEpvcmt1CgMKAS4SWwoDCgFXCggKBlBvbHNjZQoGCgR6aW1hCgYKBGplc3QKCAoGZMWCdWdhCgMKASwKBQoDYWxlCggKBmx1ZHppZQoMCgpyb3pncnplasSFCgcKBXNlcmNlCgMKASE=" http://localhost:8089/api/process
 
