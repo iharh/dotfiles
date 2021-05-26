@@ -12,6 +12,7 @@ export CLB_AUTH_SRV_DIR=$CLB_BASE_DIR/cb-authentication-server
 export CLB_OLD_AUTH_SRV_DIR=$CLB_MST_DIR/cb-auth-server
 export CLB_SRC_DIR=$CLB_BASE_DIR/platform
 export CLB_FX_DIR=$CLB_BASE_DIR/fx
+export CLB_MDM_DIR=$CLB_BASE_DIR/madamira
 export CLB_FX_MODULES_DIR=$CLB_FX_DIR/modules
 export CLB_LP_DIR=$CLB_FX_DIR/lang-packs
 export CLB_SVC_DIR=$CLB_FX_DIR/service
@@ -651,6 +652,26 @@ devstack() {
         ./devstack-linux $@
     )
     # devstack config --enable
+}
+
+run-mdm() {
+    #wrapper.java.classpath.2=MADAMIRA-release-20140725-1.0.jar
+    #wrapper.java.classpath.3=lib\\log4j-1.2.17.jar
+    #wrapper.java.classpath.4=lib\\slf4j-api-1.7.5.jar
+    #wrapper.java.classpath.5=lib\\slf4j-log4j12-1.7.5.jar
+
+    #wrapper.java.additional.1=-server
+    #wrapper.java.additional.2=-XX:+HeapDumpOnOutOfMemoryError
+    #wrapper.java.additional.3=-Xms2500m
+    #wrapper.java.additional.4=-Xmx2500m
+    #wrapper.java.additional.5=-Djava.net.preferIPv4Stack=true
+    #wrapper.java.additional.6=-Dlog4j.configuration="file:log4j.properties"
+
+    #wrapper.app.parameter.1=-s
+    #wrapper.app.parameter.2=-msaonly
+    (cd $CLB_MDM_DIR/release-20140725-1.0;\
+        java -jar MADAMIRA-release-20140725-1.0.jar -s -msaonly
+    )
 }
 
 alias rdp-bart='rdp-clb-sl bart01.clarabridge.net'

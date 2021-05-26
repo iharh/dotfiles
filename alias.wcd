@@ -6,6 +6,7 @@ repo /data/wrk/repo
 jft /data/wrk/repo/JFastText
 prj /data/wrk/prj
 clb /data/wrk/clb
+mdm /data/wrk/clb/madamira
 auth /data/wrk/clb/cb-authentication-server
 foma /data/wrk/clb/clbfoma
 kenlm /data/wrk/clb/clbkenlm
